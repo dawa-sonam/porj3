@@ -38,7 +38,7 @@ public:
     // calculating Euclidean distance between two nodes
     static double distance(const NODE &a, const NODE &b)
     {
-        return std::hypot(a.x_ - b.x_, a.y_ - b.y_);
+        return std::hypot(a.lat_ - b.lat_, a.lon_ - b.lon_);
     }
 
 
