@@ -5,7 +5,7 @@ Name: Dawa Sonam
 Date: December 22, 2023
 */
 
-// NearestNeighbor.hpp
+// NEAREST_NEIGHBOR_HPP
 #ifndef NEAREST_NEIGHBOR_HPP
 #define NEAREST_NEIGHBOR_HPP
 
@@ -88,33 +88,34 @@ void nearestNeighbor(const std::string &filename)
     double total_distance = 0.0;
 
     auto current_node_it = parsed_nodes.begin();
-    visited[current_node_it - parsed_nodes.begin()] = true;
     path.push_back(current_node_it->getId());
+    visited[current_node_it - parsed_nodes.begin()] = true;
+
 
     auto start_time = std::chrono::high_resolution_clock::now();
     
-        for (size_t i = 1; i < parsed_nodes.size(); ++i)
+    for (size_t i = 1; i < parsed_nodes.size(); ++i)
         {
-            auto nearest_node_it = parsed_nodes.end();
-            double minDistance = std::numeric_limits<double>::max();
+        auto nearest_node_it = parsed_nodes.end();
+        double minDistance = std::numeric_limits<double>::max();
 
-            // Find the nearest unvisited node
-            for (auto it = parsed_nodes.begin(); it != parsed_nodes.end(); ++it)
+        // Find the nearest unvisited node
+        for (auto it = parsed_nodes.begin(); it != parsed_nodes.end(); ++it)
+        {
+            if (!visited[it - parsed_nodes.begin()])
             {
-                if (!visited[it - parsed_nodes.begin()])
+                double distance = NODE::distance(*current_node_it, *it);
+                if (distance < minDistance)
                 {
-                    double distance = NODE::distance(*current_node_it, *it);
-                    if (distance < minDistance)
-                    {
-                        nearest_node_it = it;
-                        minDistance = distance;
-                    }
+                    nearest_node_it = it;
+                    minDistance = distance;
                 }
             }
+        }
 
+        visited[nearest_node_it - parsed_nodes.begin()] = true; 
         total_distance += minDistance;
         path.push_back(nearest_node_it->getId());
-        visited[nearest_node_it - parsed_nodes.begin()] = true; 
         current_node_it = nearest_node_it;
     }
 
@@ -126,8 +127,8 @@ void nearestNeighbor(const std::string &filename)
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // Output the path, total distance, and execution time
-    std::cout << "Path: ";
-    for (int id : path) {
+    for (int id : path)
+    {
         std::cout << id << " ";
     }
 
