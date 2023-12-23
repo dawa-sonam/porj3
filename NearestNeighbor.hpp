@@ -36,6 +36,7 @@ public:
         return lon_;
     }
     // calculating Euclidean distance between two nodes
+   // Euclidean distance formula
     static double distance(const NODE &a, const NODE &b)
     {
         return std::hypot(a.lat_ - b.lat_, a.lon_ - b.lon_);
@@ -57,18 +58,17 @@ std::vector<NODE> read_nodes_from_file(const std::string& filename)
         return {};  // Return an empty vector on error
     }
 
-    // Declare variables with clear names
     std::vector<NODE> parsed_nodes;
     std::string current_line;
-    int node_id;
-    double node_x, node_y;
+    int id;
+    double lat, lon;
 
-    while (std::getline(file, current_line)) {
-        std::istringstream line_stream(current_line);
-        if (line_stream >> node_id >> node_x >> node_y) {
-            parsed_nodes.emplace_back(node_id, node_x, node_y);
-        } else {
-            // Handle potential parsing errors if needed
+    while (std::getline(file, current_line))
+    {
+        std::istringstream iss(current_line);
+        if (iss >> id >> lat >> lon)
+        {
+            parsed_nodes.emplace_back(id, lat, lon);
         }
     }
 
@@ -78,24 +78,24 @@ std::vector<NODE> read_nodes_from_file(const std::string& filename)
 // Function to perform the nearest neighbor algorithm on a set of nodes
 void nearestNeighbor(const std::string &filename)
 {
-    auto nodes = read_nodes_from_file(filename);
-    if (nodes.empty()) {
+    auto parsed_nodes = read_nodes_from_file(filename);
+    if (parsed_nodes.empty()) {
         return;
     }
 
-    std::vector<bool> visited(nodes.size(), false);
+    std::vector<bool> visited(parsed_nodes.size(), false);
     std::vector<int> path;
     double total_distance = 0.0;
 
-    auto current_node_it = nodes.begin();
-    visited[current_node_it - nodes.begin()] = true;
+    auto current_node_it = parsed_nodes.begin();
+    visited[current_node_it - parsed_nodes.begin()] = true;
     path.push_back(current_node_it->getId());
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    for (size_t i = 1; i < nodes.size(); ++i) {
+    for (size_t i = 1; i < parsed_nodes.size(); ++i) {
         auto nearest_node_it = std::min_element(
-            nodes.begin(), nodes.end(),
+            parsed_nodes.begin(), parsed_nodes.end(),
             [&](const NODE& node1, const NODE& node2) {
                 return !visited[node1.getId() - 1] &&
                        NODE::distance(*current_node_it, node1) <
@@ -105,13 +105,13 @@ void nearestNeighbor(const std::string &filename)
 
         total_distance += NODE::distance(*current_node_it, *nearest_node_it);
         path.push_back(nearest_node_it->getId());
-        visited[nearest_node_it - nodes.begin()] = true; // Fix the index here
+        visited[nearest_node_it - parsed_nodes.begin()] = true; // Fix the index here
         current_node_it = nearest_node_it;
     }
 
     // Complete the path by adding the distance to the starting node
-    total_distance += NODE::distance(*current_node_it, nodes.front());
-    path.push_back(nodes.front().getId());
+    total_distance += NODE::distance(*current_node_it, parsed_nodes.front());
+    path.push_back(parsed_nodes.front().getId());
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
