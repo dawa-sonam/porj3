@@ -36,12 +36,9 @@ public:
         return lon_;
     }
     // calculating Euclidean distance between two nodes
-   // Euclidean distance formula
     static double distance(const NODE &a, const NODE &b)
     {
-        double dx = b.lat_ - a.lat_;
-        double dy = b.lon_ - a.lon_;
-        return std::sqrt(dx * dx + dy * dy);
+        return std::hypot(a.x_ - b.x_, a.y_ - b.y_);
     }
 
 
