@@ -108,10 +108,9 @@ void nearestNeighbor(const std::string &filename)
 
         total_distance += NODE::distance(*current_node_it, *nearest_node_it);
         path.push_back(nearest_node_it->getId());
-        visited[nearest_node_it - nodes.begin()] = true;
+        visited[nearest_node_it - nodes.begin()] = true; // Fix the index here
         current_node_it = nearest_node_it;
     }
-
 
     // Complete the path by adding the distance to the starting node
     total_distance += NODE::distance(*current_node_it, nodes.front());
