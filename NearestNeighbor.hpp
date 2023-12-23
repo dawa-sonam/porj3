@@ -5,161 +5,130 @@ Name: Dawa Sonam
 Date: December 22, 2023
 */
 
+// NearestNeighbor.hpp
 #ifndef NEAREST_NEIGHBOR_HPP
 #define NEAREST_NEIGHBOR_HPP
 
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <chrono>
+#include <fstream>
 #include <cmath>
+#include <chrono>
 #include <limits>
 #include <algorithm>
 #include <sstream>
 
-class Node
+class NODE
 {
 public:
-    Node(int id, double x, double y) : id_(id), x_(x), y_(y) {}
+    NODE(int id, double lat, double lon) : id_(id), lat_(lat), lon_(lon) {}
 
     int getId() const
     {
         return id_;
     }
-    double getX() const
+    double getLat() const
     {
-        return x_;
+        return lat_;
     }
-    double getY() const
+    double getLon() const
     {
-        return y_;
+        return lon_;
+    }
+    // calculating Euclidean distance between two nodes
+   // Euclidean distance formula
+    static double distance(const NODE &a, const NODE &b)
+    {
+        double dx = b.lat_ - a.lat_;
+        double dy = b.lon_ - a.lon_;
+        return std::sqrt(dx * dx + dy * dy);
     }
 
-    // calculating Euclidean distance between two nodes
-    static double distance(const Node &a, const Node &b)
-    {
-        return std::hypot(a.x_ - b.x_, a.y_ - b.y_);
-    }
 
 private:
     int id_;
-    double x_;
-    double y_;
+    double lat_;
+    double lon_;
 };
 
-// Function to read nodes from a file and return a vector of Nodes
-std::vector<Node> read(const std::string &filename)
+// Function to read nodes from a file and return a vector of NODEs
+std::vector<NODE> read_nodes_from_file(const std::string& filename)
 {
     std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return {};
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return {};  // Return an empty vector on error
     }
 
-    std::vector<Node> nodes;
-    std::string line;
-    int id;
-    double x, y;
+    // Declare variables with clear names
+    std::vector<NODE> parsed_nodes;
+    std::string current_line;
+    int node_id;
+    double node_x, node_y;
 
-    while (std::getline(file, line))
-    {
-        std::istringstream iss(line);
-        if (iss >> id >> x >> y)
-        {
-            nodes.emplace_back(id, x, y);
+    while (std::getline(file, current_line)) {
+        std::istringstream line_stream(current_line);
+        if (line_stream >> node_id >> node_x >> node_y) {
+            parsed_nodes.emplace_back(node_id, node_x, node_y);
+        } else {
+            // Handle potential parsing errors if needed
         }
     }
 
-    return nodes;
+    return parsed_nodes;
 }
 
 // Function to perform the nearest neighbor algorithm on a set of nodes
 void nearestNeighbor(const std::string &filename)
 {
-    // Uncomment one of the following lines based on the chosen implementation
-    // auto nodes = read(filename);  // Original implementation
-    auto nodes = readImproved(filename);  // Improved implementation
-
-    if (nodes.empty())
-    {
+    auto nodes = read_nodes_from_file(filename);
+    if (nodes.empty()) {
         return;
     }
 
-    std::vector<bool> seen(nodes.size(), false);
+    std::vector<bool> visited(nodes.size(), false);
     std::vector<int> path;
-    double tot = 0.0;
+    double total_distance = 0.0;
 
-    auto current = nodes.begin();
-    path.push_back(current->getId());
-    seen[current - nodes.begin()] = true;
+    auto current_node_it = nodes.begin();
+    visited[current_node_it - nodes.begin()] = true;
+    path.push_back(current_node_it->getId());
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::high_resolution_clock::now();
 
-    for (size_t i = 1; i < nodes.size(); ++i)
-    {
-        auto nearest = nodes.end();
-        double minDistance = std::numeric_limits<double>::max();
-
-        // Find the nearest unvisited node
-        for (auto it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if (!seen[it - nodes.begin()])
-            {
-                double distance = Node::distance(*current, *it);
-                if (distance < minDistance)
-                {
-                    nearest = it;
-                    minDistance = distance;
-                }
+    for (size_t i = 1; i < nodes.size(); ++i) {
+        auto nearest_node_it = std::min_element(
+            nodes.begin(), nodes.end(),
+            [&](const NODE& node1, const NODE& node2) {
+                return !visited[node1.getId() - 1] &&
+                       NODE::distance(*current_node_it, node1) <
+                       NODE::distance(*current_node_it, node2);
             }
-        }
+        );
 
-        // Mark the nearest node as visited and update the total distance
-        seen[nearest - nodes.begin()] = true;
-        tot += minDistance;
-        path.push_back(nearest->getId());
-        current = nearest;
+        total_distance += NODE::distance(*current_node_it, *nearest_node_it);
+        path.push_back(nearest_node_it->getId());
+        visited[nearest_node_it - nodes.begin()] = true;
+        current_node_it = nearest_node_it;
     }
 
+
     // Complete the path by adding the distance to the starting node
-    tot += Node::distance(*current, nodes.front());
+    total_distance += NODE::distance(*current_node_it, nodes.front());
     path.push_back(nodes.front().getId());
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // Output the path, total distance, and execution time
     for (int id : path)
     {
         std::cout << id << " ";
     }
-    std::cout << "\nTotal Distance: " << tot << "\nTime in ms: " << duration.count() << std::endl;
+    std::cout << "\nTotal Distance: " << total_distance << "\nTime in ms: " << duration.count() << std::endl;
 }
 
-// Improved version of read function that directly reads into the NODE class
-std::vector<Node> readImproved(const std::string &filename)
-{
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return {};
-    }
-
-    std::vector<Node> nodes;
-    std::string line;
-    int id;
-    double x, y;
-
-    while (file >> id >> x >> y)
-    {
-        nodes.emplace_back(id, x, y);
-    }
-
-    return nodes;
-}
+// Total Distance: 1.03496e+06
+// Time in ms: 5917
 
 #endif // NEAREST_NEIGHBOR_HPP
-
-
