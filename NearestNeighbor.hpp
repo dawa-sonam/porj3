@@ -92,16 +92,6 @@ void nearestNeighbor(const std::string &filename)
     path.push_back(current_node_it->getId());
 
     auto start_time = std::chrono::high_resolution_clock::now();
-
-    // for (size_t i = 1; i < parsed_nodes.size(); ++i) {
-    //     auto nearest_node_it = std::min_element(
-    //         parsed_nodes.begin(), parsed_nodes.end(),
-    //         [&](const NODE& node1, const NODE& node2) {
-    //             return !visited[node1.getId() - 1] &&
-    //                    NODE::distance(*current_node_it, node1) <
-    //                    NODE::distance(*current_node_it, node2);
-    //         }
-    //     );
     
         for (size_t i = 1; i < parsed_nodes.size(); ++i)
         {
@@ -122,9 +112,9 @@ void nearestNeighbor(const std::string &filename)
                 }
             }
 
-        total_distance += NODE::distance(*current_node_it, *nearest_node_it);
+        total_distance += minDistance;
         path.push_back(nearest_node_it->getId());
-        visited[nearest_node_it - parsed_nodes.begin()] = true; // Fix the index here
+        visited[nearest_node_it - parsed_nodes.begin()] = true; 
         current_node_it = nearest_node_it;
     }
 
