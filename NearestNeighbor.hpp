@@ -93,15 +93,34 @@ void nearestNeighbor(const std::string &filename)
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    for (size_t i = 1; i < parsed_nodes.size(); ++i) {
-        auto nearest_node_it = std::min_element(
-            parsed_nodes.begin(), parsed_nodes.end(),
-            [&](const NODE& node1, const NODE& node2) {
-                return !visited[node1.getId() - 1] &&
-                       NODE::distance(*current_node_it, node1) <
-                       NODE::distance(*current_node_it, node2);
+    // for (size_t i = 1; i < parsed_nodes.size(); ++i) {
+    //     auto nearest_node_it = std::min_element(
+    //         parsed_nodes.begin(), parsed_nodes.end(),
+    //         [&](const NODE& node1, const NODE& node2) {
+    //             return !visited[node1.getId() - 1] &&
+    //                    NODE::distance(*current_node_it, node1) <
+    //                    NODE::distance(*current_node_it, node2);
+    //         }
+    //     );
+    
+        for (size_t i = 1; i < parsed_nodes.size(); ++i)
+        {
+            auto nearest_node_it = parsed_nodes.end();
+            double minDistance = std::numeric_limits<double>::max();
+
+            // Find the nearest unvisited node
+            for (auto it = parsed_nodes.begin(); it != parsed_nodes.end(); ++it)
+            {
+                if (!visited[it - parsed_nodes.begin()])
+                {
+                    double distance = NODE::distance(*current_node_it, *it);
+                    if (distance < minDistance)
+                    {
+                        nearest_node_it = it;
+                        minDistance = distance;
+                    }
+                }
             }
-        );
 
         total_distance += NODE::distance(*current_node_it, *nearest_node_it);
         path.push_back(nearest_node_it->getId());
