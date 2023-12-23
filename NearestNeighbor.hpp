@@ -1,9 +1,8 @@
 /*
 CSCI335 Fall 2023
-Assignment 1 – Card Game
+Assignment 3- Nearest Neighbor 
 Name: Dawa Sonam
-Date: December 13, 2023
-HalfSelectionSort.hpp implements the half selection sort algorithm
+Date: December 22, 2023
 */
 
 // NearestNeighbor.hpp
