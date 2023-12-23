@@ -121,14 +121,13 @@ void nearestNeighbor(const std::string &filename)
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // Output the path, total distance, and execution time
-    for (int id : path)
-    {
+    std::cout << "Path: ";
+    for (int id : path) {
         std::cout << id << " ";
     }
-    std::cout << "\nTotal Distance: " << total_distance << "\nTime in ms: " << duration.count() << std::endl;
+
+    std::cout << "\nTotal Distance: " << total_distance << "\nExecution time in ms: " << duration.count() << std::endl;
 }
 
-// Total Distance: 1.03496e+06
-// Time in ms: 5917
 
 #endif // NEAREST_NEIGHBOR_HPP
