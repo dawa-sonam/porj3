@@ -140,7 +140,7 @@ void nearestNeighbor(const std::string &filename)
         std::cout << id << " ";
     }
 
-    std::cout << "\nTotal Distance: " << total_distance << "\nExecution time in ms: " << duration.count() << std::endl;
+    std::cout << "\nTotal Distance: " << total_distance << "\nTime in ms: " << duration.count() << std::endl;
 }
 
 #endif // NEAREST_NEIGHBOR_HPP
