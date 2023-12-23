@@ -36,10 +36,10 @@ public:
         return y_;
     }
 
-    // Calculate Manhattan distance between two nodes
-    static double distance(const Node &a, const Node &b)
+    // Calculating distance
+   static double distance(const NODE &a, const NODE &b)
     {
-        return std::abs(a.x_ - b.x_) + std::abs(a.y_ - b.y_);
+        return std::hypot(a.x_ - b.x_, a.y_ - b.y_);
     }
 
 private:
